@@ -1,332 +1,2887 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link rel="icon" type="image/png" href="favicon.png?v=5">
-  <title>Meow Bot - Top.gg</title>
-  <meta name="description" content="Meow Bot is a playful Discord bot with games, pets, quests, economy, cute images, movie tools, utility commands, and cat personality chat.">
-  <style>
-    :root {
-      color-scheme: dark;
-      --bg: #070816;
-      --bg-2: #0d1230;
-      --panel: rgba(18, 24, 54, 0.78);
-      --panel-strong: rgba(25, 32, 72, 0.94);
-      --card: rgba(255, 255, 255, 0.075);
-      --card-2: rgba(255, 255, 255, 0.11);
-      --text: #fffafd;
-      --muted: #bfc5f7;
-      --soft: #7e89ff;
-      --pink: #f765c8;
-      --cyan: #34d5ff;
-      --amber: #ffc86b;
-      --green: #5af0a1;
-      --line: rgba(213, 221, 255, 0.16);
-      --shadow: 0 28px 90px rgba(0, 0, 0, 0.35);
-    }
-
-    * { box-sizing: border-box; }
-    html { scroll-behavior: smooth; background: transparent; }
-    body {
-      margin: 0;
-      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
-      color: var(--text);
-      background:
-        radial-gradient(circle at top left, rgba(247, 101, 200, 0.2), transparent 30vw),
-        radial-gradient(circle at 85% 18%, rgba(52, 213, 255, 0.18), transparent 32vw),
-        linear-gradient(180deg, var(--bg), var(--bg-2) 46%, var(--bg));
-      overflow-x: hidden;
-    }
-
-    body:before {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -1;
-      pointer-events: none;
-      opacity: 0.22;
-      background-image:
-        linear-gradient(rgba(255,255,255,0.06) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(255,255,255,0.06) 1px, transparent 1px);
-      background-size: 72px 72px;
-      mask-image: linear-gradient(to bottom, black, transparent 78%);
-    }
-
-    a { color: inherit; text-decoration: none; }
-    img { max-width: 100%; display: block; }
-    code { font: 900 0.95em ui-monospace, SFMono-Regular, Consolas, monospace; color: var(--cyan); }
-
-    .shell { width: min(100% - 32px, 1120px); margin: 0 auto; }
-    .topgg-nav {
-      position: sticky;
-      top: 14px;
-      z-index: 20;
-      width: min(100%, 940px);
-      margin: 14px auto 0;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 16px;
-      padding: 12px 14px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      background: rgba(10, 13, 33, 0.8);
-      box-shadow: 0 22px 80px rgba(126, 91, 255, 0.18), var(--shadow);
-      backdrop-filter: blur(18px);
-    }
-
-    .brand { display: inline-flex; align-items: center; gap: 10px; font-weight: 950; letter-spacing: -0.03em; }
-    .brand img { width: 42px; height: 42px; border-radius: 999px; object-fit: cover; box-shadow: 0 0 0 2px rgba(255,255,255,0.12); }
-    .nav-pills { display: flex; align-items: center; gap: 4px; color: var(--muted); font-weight: 850; }
-    .nav-pills a { padding: 10px 12px; border-radius: 999px; }
-    .nav-pills a:hover { color: var(--text); background: var(--card); }
-
-    .button-primary,
-    .button-secondary {
-      display: inline-flex;
-      min-height: 46px;
-      align-items: center;
-      justify-content: center;
-      border-radius: 999px;
-      padding: 0 18px;
-      font-weight: 950;
-      letter-spacing: -0.02em;
-      white-space: nowrap;
-    }
-
-    .button-primary {
-      color: #fff;
-      background: linear-gradient(120deg, #6f35ff 0%, #21d4fd 38%, #b721ff 72%, #6f35ff 100%);
-      background-size: 240% 240%;
-      box-shadow: 0 16px 34px rgba(111, 53, 255, 0.24), 0 0 0 1px rgba(255,255,255,0.28) inset;
-      animation: gradientFlow 3.8s ease-in-out infinite;
-    }
-
-    .button-secondary { border: 1px solid var(--line); color: var(--text); background: var(--card); }
-
-    .hero {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr) minmax(300px, 0.76fr);
-      gap: clamp(24px, 5vw, 58px);
-      align-items: center;
-      padding: clamp(42px, 7vw, 78px) 0 40px;
-    }
-
-    .eyebrow {
-      display: inline-flex;
-      width: fit-content;
-      margin-bottom: 18px;
-      padding: 9px 13px;
-      border: 1px solid var(--line);
-      border-radius: 999px;
-      color: var(--muted);
-      background: var(--card);
-      font-size: 0.82rem;
-      font-weight: 950;
-      letter-spacing: 0.08em;
-      text-transform: uppercase;
-    }
-
-    h1 { margin: 0; max-width: 820px; font-size: clamp(3.4rem, 8.5vw, 7rem); line-height: 0.9; letter-spacing: -0.09em; text-transform: uppercase; }
-    h1 span { display: block; font-weight: 300; font-style: italic; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.9); }
-    .lead { max-width: 680px; margin: 22px 0 0; color: var(--muted); font-size: clamp(1.02rem, 1.6vw, 1.24rem); line-height: 1.65; }
-    .hero-actions { display: flex; flex-wrap: wrap; gap: 12px; margin-top: 28px; }
-    .hero-card { position: relative; min-height: 440px; display: grid; place-items: center; border: 1px solid var(--line); border-radius: 34px; background: radial-gradient(circle at 78% 18%, rgba(247,101,200,0.32), transparent 31%), radial-gradient(circle at 12% 8%, rgba(85,200,255,0.16), transparent 34%), linear-gradient(145deg, rgba(35,45,100,0.96), rgba(10,14,42,0.98)); box-shadow: var(--shadow); overflow: hidden; }
-    .hero-card img { width: min(70%, 270px); filter: drop-shadow(0 24px 34px rgba(0,0,0,0.3)); }
-    .float-card { position: absolute; display: grid; gap: 4px; min-width: 168px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 20px; background: rgba(9, 11, 31, 0.72); color: var(--muted); backdrop-filter: blur(18px); }
-    .float-card strong { color: var(--text); }
-    .float-card.is-one { top: 24px; left: 18px; }
-    .float-card.is-two { right: 18px; bottom: 28px; }
-
-    .stats { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin: 10px 0 58px; }
-    .stat { padding: 18px; border: 1px solid var(--line); border-radius: 22px; background: var(--panel); }
-    .stat strong { display: block; font-size: clamp(1.65rem, 3.4vw, 2.8rem); line-height: 1; letter-spacing: -0.06em; }
-    .stat span { display: block; margin-top: 8px; color: var(--muted); font-weight: 850; }
-
-    .section { padding: 42px 0; }
-    .section-head { max-width: 760px; margin-bottom: 22px; }
-    .section-kicker { color: var(--cyan); font-weight: 950; letter-spacing: 0.11em; text-transform: uppercase; font-size: 0.78rem; }
-    h2 { margin: 10px 0 0; font-size: clamp(2.25rem, 5vw, 4.4rem); line-height: 0.96; letter-spacing: -0.08em; text-transform: uppercase; }
-    h2 em { display: block; font-weight: 300; color: transparent; -webkit-text-stroke: 1px rgba(255,255,255,0.82); }
-    .section-copy { max-width: 720px; margin: 14px 0 0; color: var(--muted); font-size: 1.02rem; line-height: 1.7; }
-
-    .feature-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 14px; }
-    .feature-card { min-height: 230px; padding: 20px; border: 1px solid var(--line); border-radius: 28px; background: var(--panel); position: relative; overflow: hidden; }
-    .feature-card:after { content: ""; position: absolute; width: 150px; height: 150px; right: -50px; top: -56px; border-radius: 999px; background: radial-gradient(circle, rgba(247,101,200,0.24), transparent 70%); }
-    .feature-card b { display: grid; place-items: center; width: 46px; height: 46px; border-radius: 17px; margin-bottom: 22px; color: var(--cyan); background: var(--card-2); }
-    .feature-card h3 { margin: 0; font-size: 1.24rem; letter-spacing: -0.035em; }
-    .feature-card p { margin: 12px 0 0; color: var(--muted); line-height: 1.6; }
-
-    .command-board { display: grid; grid-template-columns: minmax(0, 0.9fr) minmax(280px, 1fr); gap: 16px; align-items: stretch; }
-    .panel { border: 1px solid var(--line); border-radius: 30px; background: var(--panel-strong); box-shadow: var(--shadow); padding: 18px; }
-    .command-list { display: grid; gap: 10px; }
-    .command-item { display: grid; grid-template-columns: auto minmax(0, 1fr); gap: 12px; align-items: start; padding: 13px; border: 1px solid var(--line); border-radius: 18px; background: rgba(255,255,255,0.045); }
-    .command-item code { padding-top: 2px; }
-    .command-item span { color: var(--muted); line-height: 1.45; }
-    .discord-preview { display: grid; gap: 12px; }
-    .message { display: grid; grid-template-columns: 42px minmax(0, 1fr); gap: 12px; align-items: start; }
-    .avatar { width: 42px; height: 42px; border-radius: 16px; display: grid; place-items: center; color: #fff; background: linear-gradient(135deg, var(--pink), var(--soft)); font-weight: 950; }
-    .bubble { padding: 14px 16px; border-radius: 18px; background: rgba(255,255,255,0.085); color: var(--muted); line-height: 1.45; }
-    .bubble strong { display: block; margin-bottom: 4px; color: var(--text); }
-
-    .mode-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 14px; }
-    .mode-card { padding: 20px; border: 1px solid var(--line); border-radius: 26px; background: var(--panel); }
-    .mode-card h3 { margin: 0 0 10px; font-size: 1.18rem; }
-    .tag-row { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 14px; }
-    .tag { padding: 8px 10px; border: 1px solid var(--line); border-radius: 999px; color: var(--muted); background: var(--card); font-weight: 850; }
-
-    .cta-panel { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 18px; align-items: center; margin: 48px 0 22px; padding: clamp(24px, 4vw, 40px); border: 1px solid var(--line); border-radius: 34px; background: linear-gradient(135deg, rgba(126,137,255,0.24), rgba(247,101,200,0.18)), var(--panel-strong); box-shadow: var(--shadow); }
-    .cta-panel h2 { margin: 0; }
-    .cta-panel p { margin: 12px 0 0; color: var(--muted); line-height: 1.65; }
-    .mini-footer { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 10px; padding: 20px 0 28px; color: var(--muted); border-top: 1px solid var(--line); }
-
-    @keyframes gradientFlow { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
-
-    @media (max-width: 860px) {
-      .nav-pills { display: none; }
-      .hero,
-      .command-board,
-      .cta-panel { grid-template-columns: 1fr; }
-      .stats,
-      .feature-grid,
-      .mode-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
-      .cta-panel .hero-actions { justify-content: flex-start; }
-    }
-
-    @media (max-width: 560px) {
-      .shell { width: min(100% - 16px, 1120px); }
-      .topgg-nav { top: 8px; border-radius: 22px; padding: 9px 10px; }
-      .brand img { width: 36px; height: 36px; }
-      .button-primary,
-      .button-secondary { min-height: 42px; padding: 0 14px; white-space: normal; text-align: center; }
-      h1 { font-size: clamp(3rem, 17vw, 5rem); }
-      .hero-card { min-height: 260px; border-radius: 26px; }
-      .hero-card img { width: min(58%, 210px); }
-      .float-card { display: none; }
-      .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 34px; }
-      .stat { padding: 14px; border-radius: 18px; }
-      .feature-grid,
-      .mode-grid { grid-template-columns: 1fr; }
-      .feature-card { min-height: 0; }
-      .command-item { grid-template-columns: 1fr; }
-    }
-  </style>
-</head>
-<body>
-  <nav class="topgg-nav shell" aria-label="Meow Bot Top.gg page navigation">
-    <a class="brand" href="https://meow-aibot.vercel.app" target="_blank" rel="noopener noreferrer"><img src="favicon.png?v=5" alt="Meow Bot logo"><span>Meow Bot</span></a>
-    <div class="nav-pills"><a href="#features">Features</a><a href="#commands">Commands</a><a href="#games">Games</a><a href="#setup">Setup</a></div>
-    <a class="button-primary" href="https://discord.com/oauth2/authorize?client_id=1488940777190199386" target="_blank" rel="noopener noreferrer">Invite</a>
-  </nav>
-
-  <main class="shell">
-    <section class="hero" aria-label="Meow Bot hero">
-      <div>
-        <div class="eyebrow">Cat chaos, useful tools</div>
-        <h1>Discord chaos, <span>cat approved.</span></h1>
-        <p class="lead">Meow Bot turns quiet servers into playful communities with social games, pets, quests, economy, cute images, movie tools, lookup commands, and a sassy cat personality.</p>
-        <div class="hero-actions"><a class="button-primary" href="https://discord.com/oauth2/authorize?client_id=1488940777190199386" target="_blank" rel="noopener noreferrer">Add Meow Bot</a><a class="button-secondary" href="https://meow-aibot.vercel.app" target="_blank" rel="noopener noreferrer">Open Website</a><a class="button-secondary" href="https://discord.gg/qTYe924aGe" target="_blank" rel="noopener noreferrer">Support Server</a></div>
-      </div>
-      <aside class="hero-card">
-        <img src="1.png" alt="Sleeping cat mascot">
-        <div class="float-card is-one"><strong>Daily quests</strong><span>Private completion notices</span></div>
-        <div class="float-card is-two"><strong>Pet mood</strong><span>Sleepy but judging</span></div>
-      </aside>
-    </section>
-
-    <section class="stats" aria-label="Live Meow Bot stats">
-      <article class="stat"><strong data-live-stat="servers">0</strong><span>servers live</span></article>
-      <article class="stat"><strong data-live-stat="players">0</strong><span>players tracked</span></article>
-      <article class="stat"><strong data-live-stat="commands">0</strong><span>slash commands</span></article>
-      <article class="stat"><strong>24/7</strong><span>community utilities</span></article>
-    </section>
-
-    <section id="features" class="section">
-      <div class="section-head"><div class="section-kicker">Why servers use it</div><h2>More than a command bot. <em>It has a personality.</em></h2><p class="section-copy">Meow Bot is built for repeat use: members can play, collect, vote, hatch pets, complete quests, look things up, and poke the cat until it judges them.</p></div>
-      <div class="feature-grid">
-        <article class="feature-card"><b>01</b><h3>Games that rescue dead chat</h3><p>Trivia, Wordle, WTP, hangman, riddles, country games, blackjack, lotteries, and more.</p></article>
-        <article class="feature-card"><b>02</b><h3>Progression that keeps people coming back</h3><p>Coins, XP, daily quests, achievements, pets, streaks, shop items, badges, and leaderboards.</p></article>
-        <article class="feature-card"><b>03</b><h3>Utilities with cat energy</h3><p>Cute images, cat facts, movies, anime, manga, dictionary, Wikipedia, advice, jokes, reminders, and sassy chat.</p></article>
-      </div>
-    </section>
-
-    <section id="commands" class="section">
-      <div class="section-head"><div class="section-kicker">Slash command playground</div><h2>Useful commands, <em>zero boring vibes.</em></h2><p class="section-copy">A few examples from the command set. The full directory is on the website.</p></div>
-      <div class="command-board">
-        <div class="panel command-list">
-          <div class="command-item"><code>/quests</code><span>View daily quests and progress toward bonus coins.</span></div>
-          <div class="command-item"><code>/pet</code><span>Care for your companion, check mood, hatch eggs, and manage progress.</span></div>
-          <div class="command-item"><code>/cute</code><span>Pull safe cute images from selected communities with a next button.</span></div>
-          <div class="command-item"><code>/movie poll</code><span>Start a movie-night vote without everyone yelling over each other.</span></div>
-          <div class="command-item"><code>/counting setup</code><span>Configure counting channels, goals, resumes, emojis, and leaderboards.</span></div>
-        </div>
-        <div class="panel discord-preview">
-          <div class="message"><div class="avatar">M</div><div class="bubble"><strong>Meow Bot</strong>Daily quests reset. Someone should absolutely start trivia.</div></div>
-          <div class="message"><div class="avatar">U</div><div class="bubble"><strong>Server Member</strong><code>/cute</code></div></div>
-          <div class="message"><div class="avatar">M</div><div class="bubble"><strong>Meow Bot</strong>Certified cute delivered. Button ready for the next one.</div></div>
-        </div>
-      </div>
-    </section>
-
-    <section id="games" class="section">
-      <div class="section-head"><div class="section-kicker">The fun stuff</div><h2>Pick your chaos. <em>Meow handles the rules.</em></h2></div>
-      <div class="mode-grid">
-        <article class="mode-card"><h3>Party Games</h3><p class="section-copy">Trivia, Would You Rather, riddles, hangman, scramble, country games, and Pokémon guessing are built for quick channel activity.</p><div class="tag-row"><span class="tag">Trivia</span><span class="tag">WTP</span><span class="tag">Wordle</span></div></article>
-        <article class="mode-card"><h3>Economy + Events</h3><p class="section-copy">Coins connect to daily actions, games, lotteries, leaderboards, and rewards so members have a reason to return.</p><div class="tag-row"><span class="tag">Coins</span><span class="tag">Lottery</span><span class="tag">Shop</span></div></article>
-        <article class="mode-card"><h3>Pets + Quests</h3><p class="section-copy">Pets give long-term progression. Daily quests add small goals without forcing public spam.</p><div class="tag-row"><span class="tag">Pets</span><span class="tag">Eggs</span><span class="tag">Daily quests</span></div></article>
-        <article class="mode-card"><h3>Server Tools</h3><p class="section-copy">Configure talk channels, pet channels, logs, announcements, Wordle, counting, reactions, and more through commands or dashboard tools.</p><div class="tag-row"><span class="tag">Setup</span><span class="tag">Logs</span><span class="tag">Dashboard</span></div></article>
-      </div>
-    </section>
-
-    <section id="setup" class="cta-panel">
-      <div><h2>Add the cat. Wake the server.</h2><p>Invite Meow Bot, choose a few setup channels, and let your members start playing, collecting, voting, questing, and causing carefully supervised cat chaos.</p></div>
-      <div class="hero-actions"><a class="button-primary" href="https://discord.com/oauth2/authorize?client_id=1488940777190199386" target="_blank" rel="noopener noreferrer">Invite Meow Bot</a><a class="button-secondary" href="https://meow-aibot.vercel.app/commands" target="_blank" rel="noopener noreferrer">See Commands</a></div>
-    </section>
-
-    <footer class="mini-footer"><span>Meow Bot for Discord communities that like cats and chaos.</span><span>Website: meow-aibot.vercel.app</span></footer>
-  </main>
-
-  <script>
-    (function () {
-      function endpointList(pathname) {
-        var endpoints = [];
-        function add(url) { if (url && endpoints.indexOf(url) === -1) endpoints.push(url); }
-        if (window.location.protocol !== "file:") add(window.location.origin.replace(/\/$/, "") + pathname);
-        if (window.location.protocol === "file:" || /^(localhost|127\.0\.0\.1)$/i.test(window.location.hostname)) add("http://127.0.0.1:3001" + pathname);
-        return endpoints;
+[
+  {
+    "options": [],
+    "name": "ping",
+    "description": "Ping the bot",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "User to inspect",
+        "required": false,
+        "type": 6
       }
-
-      function formatCount(value) {
-        var number = Number(value) || 0;
-        if (number >= 1000000) return (number / 1000000).toFixed(1).replace(/\.0$/, "") + "M";
-        if (number >= 1000) return (number / 1000).toFixed(1).replace(/\.0$/, "") + "K";
-        return String(number);
+    ],
+    "name": "profile",
+    "description": "View a user profile",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "view",
+        "description": "View a server-only identity card",
+        "options": [
+          {
+            "name": "user",
+            "description": "User to inspect",
+            "required": false,
+            "type": 6
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "filled",
+        "description": "Admin: list members who filled identity card details",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Any Details",
+                "value": "any"
+              },
+              {
+                "name": "All Details",
+                "value": "all"
+              },
+              {
+                "name": "Name/Nickname",
+                "value": "nickname"
+              },
+              {
+                "name": "Date of Birth/Age",
+                "value": "dob"
+              },
+              {
+                "name": "Gender/Pronouns",
+                "value": "gender"
+              },
+              {
+                "name": "Country",
+                "value": "country"
+              },
+              {
+                "name": "Height",
+                "value": "height"
+              },
+              {
+                "name": "Vibes",
+                "value": "vibes"
+              },
+              {
+                "name": "Spirit Animal",
+                "value": "spiritAnimal"
+              },
+              {
+                "name": "Besties",
+                "value": "friendUserIds"
+              }
+            ],
+            "name": "field",
+            "description": "Only show cards with this field filled",
+            "required": false
+          },
+          {
+            "min_value": 1,
+            "type": 4,
+            "name": "page",
+            "description": "Page number",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "set",
+        "description": "Update your identity card for this server",
+        "options": [
+          {
+            "type": 3,
+            "name": "nickname",
+            "description": "Name or nickname for this server",
+            "required": false,
+            "max_length": 40
+          },
+          {
+            "type": 3,
+            "name": "dob",
+            "description": "Date of birth as YYYY-MM-DD; bot shows DOB and age",
+            "required": false,
+            "max_length": 10
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "He/Him",
+                "value": "He/Him"
+              },
+              {
+                "name": "She/Her",
+                "value": "She/Her"
+              },
+              {
+                "name": "They/Them",
+                "value": "They/Them"
+              },
+              {
+                "name": "Any Pronouns",
+                "value": "Any Pronouns"
+              },
+              {
+                "name": "Ask Me",
+                "value": "Ask Me"
+              },
+              {
+                "name": "None",
+                "value": "None"
+              }
+            ],
+            "name": "gender",
+            "description": "Choose gender/pronouns",
+            "required": false
+          },
+          {
+            "type": 3,
+            "name": "gender_custom",
+            "description": "Custom gender/pronouns; overrides the choice",
+            "required": false,
+            "max_length": 40
+          },
+          {
+            "type": 3,
+            "name": "country",
+            "description": "Country",
+            "required": false,
+            "max_length": 56
+          },
+          {
+            "type": 3,
+            "name": "height",
+            "description": "Height, like 5'8, 172 cm, or tiny menace",
+            "required": false,
+            "max_length": 32
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Chaotic",
+                "value": "Chaotic"
+              },
+              {
+                "name": "Calm",
+                "value": "Calm"
+              },
+              {
+                "name": "Sarcastic",
+                "value": "Sarcastic"
+              },
+              {
+                "name": "Wholesome",
+                "value": "Wholesome"
+              },
+              {
+                "name": "Cozy",
+                "value": "Cozy"
+              },
+              {
+                "name": "Mysterious",
+                "value": "Mysterious"
+              },
+              {
+                "name": "Dramatic",
+                "value": "Dramatic"
+              },
+              {
+                "name": "Sleepy",
+                "value": "Sleepy"
+              },
+              {
+                "name": "Gremlin Energy",
+                "value": "Gremlin Energy"
+              },
+              {
+                "name": "Soft Chaos",
+                "value": "Soft Chaos"
+              },
+              {
+                "name": "Menace",
+                "value": "Menace"
+              },
+              {
+                "name": "Golden Retriever",
+                "value": "Golden Retriever"
+              }
+            ],
+            "name": "vibe_1",
+            "description": "Choose a vibe",
+            "required": false
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Chaotic",
+                "value": "Chaotic"
+              },
+              {
+                "name": "Calm",
+                "value": "Calm"
+              },
+              {
+                "name": "Sarcastic",
+                "value": "Sarcastic"
+              },
+              {
+                "name": "Wholesome",
+                "value": "Wholesome"
+              },
+              {
+                "name": "Cozy",
+                "value": "Cozy"
+              },
+              {
+                "name": "Mysterious",
+                "value": "Mysterious"
+              },
+              {
+                "name": "Dramatic",
+                "value": "Dramatic"
+              },
+              {
+                "name": "Sleepy",
+                "value": "Sleepy"
+              },
+              {
+                "name": "Gremlin Energy",
+                "value": "Gremlin Energy"
+              },
+              {
+                "name": "Soft Chaos",
+                "value": "Soft Chaos"
+              },
+              {
+                "name": "Menace",
+                "value": "Menace"
+              },
+              {
+                "name": "Golden Retriever",
+                "value": "Golden Retriever"
+              }
+            ],
+            "name": "vibe_2",
+            "description": "Choose another vibe",
+            "required": false
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Chaotic",
+                "value": "Chaotic"
+              },
+              {
+                "name": "Calm",
+                "value": "Calm"
+              },
+              {
+                "name": "Sarcastic",
+                "value": "Sarcastic"
+              },
+              {
+                "name": "Wholesome",
+                "value": "Wholesome"
+              },
+              {
+                "name": "Cozy",
+                "value": "Cozy"
+              },
+              {
+                "name": "Mysterious",
+                "value": "Mysterious"
+              },
+              {
+                "name": "Dramatic",
+                "value": "Dramatic"
+              },
+              {
+                "name": "Sleepy",
+                "value": "Sleepy"
+              },
+              {
+                "name": "Gremlin Energy",
+                "value": "Gremlin Energy"
+              },
+              {
+                "name": "Soft Chaos",
+                "value": "Soft Chaos"
+              },
+              {
+                "name": "Menace",
+                "value": "Menace"
+              },
+              {
+                "name": "Golden Retriever",
+                "value": "Golden Retriever"
+              }
+            ],
+            "name": "vibe_3",
+            "description": "Choose another vibe",
+            "required": false
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Chaotic",
+                "value": "Chaotic"
+              },
+              {
+                "name": "Calm",
+                "value": "Calm"
+              },
+              {
+                "name": "Sarcastic",
+                "value": "Sarcastic"
+              },
+              {
+                "name": "Wholesome",
+                "value": "Wholesome"
+              },
+              {
+                "name": "Cozy",
+                "value": "Cozy"
+              },
+              {
+                "name": "Mysterious",
+                "value": "Mysterious"
+              },
+              {
+                "name": "Dramatic",
+                "value": "Dramatic"
+              },
+              {
+                "name": "Sleepy",
+                "value": "Sleepy"
+              },
+              {
+                "name": "Gremlin Energy",
+                "value": "Gremlin Energy"
+              },
+              {
+                "name": "Soft Chaos",
+                "value": "Soft Chaos"
+              },
+              {
+                "name": "Menace",
+                "value": "Menace"
+              },
+              {
+                "name": "Golden Retriever",
+                "value": "Golden Retriever"
+              }
+            ],
+            "name": "vibe_4",
+            "description": "Choose another vibe",
+            "required": false
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Chaotic",
+                "value": "Chaotic"
+              },
+              {
+                "name": "Calm",
+                "value": "Calm"
+              },
+              {
+                "name": "Sarcastic",
+                "value": "Sarcastic"
+              },
+              {
+                "name": "Wholesome",
+                "value": "Wholesome"
+              },
+              {
+                "name": "Cozy",
+                "value": "Cozy"
+              },
+              {
+                "name": "Mysterious",
+                "value": "Mysterious"
+              },
+              {
+                "name": "Dramatic",
+                "value": "Dramatic"
+              },
+              {
+                "name": "Sleepy",
+                "value": "Sleepy"
+              },
+              {
+                "name": "Gremlin Energy",
+                "value": "Gremlin Energy"
+              },
+              {
+                "name": "Soft Chaos",
+                "value": "Soft Chaos"
+              },
+              {
+                "name": "Menace",
+                "value": "Menace"
+              },
+              {
+                "name": "Golden Retriever",
+                "value": "Golden Retriever"
+              }
+            ],
+            "name": "vibe_5",
+            "description": "Choose another vibe",
+            "required": false
+          },
+          {
+            "type": 3,
+            "name": "vibe_custom",
+            "description": "Custom vibe; adds one more vibe",
+            "required": false,
+            "max_length": 40
+          },
+          {
+            "type": 3,
+            "name": "spirit_animal",
+            "description": "Spirit animal",
+            "required": false,
+            "max_length": 40
+          },
+          {
+            "name": "friend_1",
+            "description": "Bestie to show on the card",
+            "required": false,
+            "type": 6
+          },
+          {
+            "name": "friend_2",
+            "description": "Another bestie to show on the card",
+            "required": false,
+            "type": 6
+          },
+          {
+            "name": "friend_3",
+            "description": "Another bestie to show on the card",
+            "required": false,
+            "type": 6
+          },
+          {
+            "name": "friend_4",
+            "description": "Another bestie to show on the card",
+            "required": false,
+            "type": 6
+          },
+          {
+            "name": "friend_5",
+            "description": "Another bestie to show on the card",
+            "required": false,
+            "type": 6
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "clear",
+        "description": "Clear part or all of your server identity card",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "All",
+                "value": "all"
+              },
+              {
+                "name": "Name/Nickname",
+                "value": "nickname"
+              },
+              {
+                "name": "Date of Birth/Age",
+                "value": "dob"
+              },
+              {
+                "name": "Gender/Pronouns",
+                "value": "gender"
+              },
+              {
+                "name": "Country",
+                "value": "country"
+              },
+              {
+                "name": "Height",
+                "value": "height"
+              },
+              {
+                "name": "Vibes",
+                "value": "vibes"
+              },
+              {
+                "name": "Spirit Animal",
+                "value": "spiritAnimal"
+              },
+              {
+                "name": "Besties",
+                "value": "friendUserIds"
+              }
+            ],
+            "name": "field",
+            "description": "Field to clear",
+            "required": true
+          }
+        ]
       }
-
-      async function fetchFirstJson(pathname) {
-        var endpoints = endpointList(pathname);
-        for (var i = 0; i < endpoints.length; i += 1) {
-          try {
-            var response = await fetch(endpoints[i], { headers: { "Accept": "application/json" } });
-            if (response.ok) return await response.json();
-          } catch (_) {}
-        }
-        return null;
+    ],
+    "name": "identity",
+    "description": "Create or view a server-only identity card",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "admindashboard",
+    "description": "Open the admin dashboard",
+    "default_member_permissions": "32",
+    "dm_permission": false,
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "mood",
+    "description": "Check bot mood",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "daily",
+    "description": "Claim daily coins (streak bonus!)",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "On",
+            "value": "on"
+          },
+          {
+            "name": "Off",
+            "value": "off"
+          }
+        ],
+        "name": "mode",
+        "description": "Reminder DM setting",
+        "required": true
       }
-
-      async function hydrateStats() {
-        var stats = await fetchFirstJson("/api/stats?t=" + Date.now());
-        if (!stats) return;
-        document.querySelectorAll("[data-live-stat]").forEach(function (element) {
-          var key = element.getAttribute("data-live-stat");
-          if (Object.prototype.hasOwnProperty.call(stats, key)) element.textContent = formatCount(stats[key]);
-        });
+    ],
+    "name": "reminder",
+    "description": "Turn automatic reminder DMs on or off",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "On",
+            "value": "on"
+          },
+          {
+            "name": "Off",
+            "value": "off"
+          }
+        ],
+        "name": "mode",
+        "description": "Quest completion message setting",
+        "required": true
       }
-
-      hydrateStats();
-      window.setInterval(hydrateStats, 60000);
-    }());
-  </script>
-</body>
-</html>
+    ],
+    "name": "questnotifications",
+    "description": "Turn private daily quest completion messages on or off",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "balance",
+    "description": "Check coin balance",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "word",
+        "description": "Word to define",
+        "required": true
+      }
+    ],
+    "name": "dictionary",
+    "description": "Look up a word in the dictionary",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "query",
+        "description": "Topic to search",
+        "required": true
+      }
+    ],
+    "name": "wikipedia",
+    "description": "Look up a topic on Wikipedia",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "info",
+        "description": "Look up an anime on AniList",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Anime title to search",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "recommend",
+        "description": "Get AniList recommendations from an anime title",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Anime title to use",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "library",
+        "description": "Browse your anime library by AniList-style status",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "import",
+        "description": "Import a public AniList anime list into your bot lists",
+        "options": [
+          {
+            "type": 3,
+            "name": "username",
+            "description": "AniList username",
+            "required": true
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "All Statuses",
+                "value": "all"
+              },
+              {
+                "name": "Planning",
+                "value": "planning"
+              },
+              {
+                "name": "Watching",
+                "value": "watching"
+              },
+              {
+                "name": "Completed",
+                "value": "completed"
+              },
+              {
+                "name": "Paused",
+                "value": "paused"
+              },
+              {
+                "name": "Dropped",
+                "value": "dropped"
+              }
+            ],
+            "name": "source",
+            "description": "Which AniList list to import",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "character",
+        "description": "Look up an anime character on AniList",
+        "options": [
+          {
+            "type": 3,
+            "name": "name",
+            "description": "Character name to search",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "name": "anime",
+    "description": "Anime info and recommendations from AniList",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "info",
+        "description": "Look up a manga on AniList",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Manga title to search",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "recommend",
+        "description": "Get AniList recommendations from a manga title",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Manga title to use",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "library",
+        "description": "Browse your manga library by AniList-style status",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "import",
+        "description": "Import a public AniList manga list into your bot lists",
+        "options": [
+          {
+            "type": 3,
+            "name": "username",
+            "description": "AniList username",
+            "required": true
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "All Statuses",
+                "value": "all"
+              },
+              {
+                "name": "Planning",
+                "value": "planning"
+              },
+              {
+                "name": "Reading",
+                "value": "reading"
+              },
+              {
+                "name": "Completed",
+                "value": "completed"
+              },
+              {
+                "name": "Paused",
+                "value": "paused"
+              },
+              {
+                "name": "Dropped",
+                "value": "dropped"
+              }
+            ],
+            "name": "source",
+            "description": "Which AniList list to import",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "name": "manga",
+    "description": "Manga info and recommendations from AniList",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "slots",
+        "description": "Slots machine",
+        "options": [
+          {
+            "max_value": 10000,
+            "min_value": 1,
+            "type": 4,
+            "name": "bet",
+            "description": "Bet amount",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "roulette",
+        "description": "Roll roulette",
+        "options": [
+          {
+            "max_value": 10000,
+            "min_value": 1,
+            "type": 4,
+            "name": "bet",
+            "description": "Bet amount",
+            "required": true
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "🔴 Red",
+                "value": "red"
+              },
+              {
+                "name": "⚫ Black",
+                "value": "black"
+              },
+              {
+                "name": "Even",
+                "value": "even"
+              },
+              {
+                "name": "Odd",
+                "value": "odd"
+              }
+            ],
+            "name": "choice",
+            "description": "Your bet",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "dice",
+        "description": "Roll dice",
+        "options": [
+          {
+            "max_value": 1000,
+            "min_value": 1,
+            "type": 4,
+            "name": "bet",
+            "description": "Bet amount",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "coinflip",
+        "description": "Flip a coin",
+        "options": [
+          {
+            "max_value": 1000,
+            "min_value": 1,
+            "type": 4,
+            "name": "bet",
+            "description": "Bet amount",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "name": "gamble",
+    "description": "Gamble coins",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "coinflip",
+        "description": "Coin flip duel",
+        "options": [
+          {
+            "name": "opponent",
+            "description": "Who to challenge",
+            "required": true,
+            "type": 6
+          },
+          {
+            "max_value": 1000,
+            "min_value": 10,
+            "type": 4,
+            "name": "amount",
+            "description": "Coins to bet",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "dice",
+        "description": "Dice roll duel",
+        "options": [
+          {
+            "name": "opponent",
+            "description": "Who to challenge",
+            "required": true,
+            "type": 6
+          },
+          {
+            "max_value": 1000,
+            "min_value": 10,
+            "type": 4,
+            "name": "amount",
+            "description": "Coins to bet",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "rps",
+        "description": "Rock-paper-scissors duel",
+        "options": [
+          {
+            "name": "opponent",
+            "description": "Who to challenge",
+            "required": true,
+            "type": 6
+          },
+          {
+            "max_value": 1000,
+            "min_value": 10,
+            "type": 4,
+            "name": "amount",
+            "description": "Coins to bet",
+            "required": true
+          }
+        ]
+      }
+    ],
+    "name": "pvp",
+    "description": "Challenge another player",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "Recipient",
+        "required": true,
+        "type": 6
+      },
+      {
+        "min_value": 1,
+        "type": 4,
+        "name": "amount",
+        "description": "Amount",
+        "required": true
+      }
+    ],
+    "name": "give",
+    "description": "Give coins to someone",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "hide_owned",
+        "description": "Show only items you do not own",
+        "required": false,
+        "type": 5
+      }
+    ],
+    "name": "shop",
+    "description": "Buy titles, badges, and pets",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "mysterybox",
+    "description": "Open the graphical mystery box hub",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "activitylog",
+    "description": "View your recent tracked rewards and game results",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "cat",
+    "description": "Get a random cat image",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "autocomplete": true,
+        "type": 3,
+        "name": "type",
+        "description": "Pick a supported animal, or leave blank for random",
+        "required": false
+      }
+    ],
+    "name": "animals",
+    "description": "Get a random animal image and supported animals list",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "cute",
+    "description": "Get a cute image",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "fact",
+    "description": "Get a random fact",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "nature",
+    "description": "Get a nature wallpaper",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "catfact",
+    "description": "Get a cat fact",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "funnycat",
+    "description": "Get a funny cat image",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "getadvice",
+    "description": "Get a random advice slip",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "joke",
+    "description": "Get a random joke",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "autocomplete": true,
+        "type": 3,
+        "name": "breed",
+        "description": "Dog breed or sub-breed",
+        "required": false
+      }
+    ],
+    "name": "dog",
+    "description": "Get a random dog image",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "💰 Coins",
+            "value": "coins"
+          },
+          {
+            "name": "⭐ XP/Level",
+            "value": "xp"
+          },
+          {
+            "name": "🔥 Daily Streak",
+            "value": "streak"
+          },
+          {
+            "name": "🟩 Wordle Wins",
+            "value": "wordle"
+          },
+          {
+            "name": "🍿 Movie Taste",
+            "value": "movie"
+          },
+          {
+            "name": "🏆 Achievements",
+            "value": "achievements"
+          },
+          {
+            "name": "🔢 Counting Goals",
+            "value": "counting"
+          }
+        ],
+        "name": "type",
+        "description": "Sort by",
+        "required": false
+      },
+      {
+        "name": "global",
+        "description": "Global leaderboard (all servers)",
+        "required": false,
+        "type": 5
+      },
+      {
+        "max_value": 100,
+        "min_value": 1,
+        "type": 4,
+        "name": "page",
+        "description": "Page number",
+        "required": false
+      }
+    ],
+    "name": "leaderboard",
+    "description": "Server leaderboard",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "Target",
+        "required": true,
+        "type": 6
+      }
+    ],
+    "name": "roast",
+    "description": "Roast someone (fun mode!)",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "like",
+        "description": "Get recommendations based on a movie you like",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie you like",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "genre",
+        "description": "Browse movies by genre",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "🎬 Action",
+                "value": "28"
+              },
+              {
+                "name": "🎭 Comedy",
+                "value": "35"
+              },
+              {
+                "name": "😱 Horror",
+                "value": "27"
+              },
+              {
+                "name": "💔 Drama",
+                "value": "18"
+              },
+              {
+                "name": "🚀 Sci-Fi",
+                "value": "878"
+              },
+              {
+                "name": "💕 Romance",
+                "value": "10749"
+              },
+              {
+                "name": "😰 Thriller",
+                "value": "53"
+              },
+              {
+                "name": "🎬 Animation",
+                "value": "16"
+              },
+              {
+                "name": "🔍 Mystery",
+                "value": "9648"
+              },
+              {
+                "name": "👻 Fantasy",
+                "value": "14"
+              }
+            ],
+            "name": "genre",
+            "description": "Genre to browse",
+            "required": true
+          },
+          {
+            "max_value": 2100,
+            "min_value": 1900,
+            "type": 4,
+            "name": "year",
+            "description": "Release year filter",
+            "required": false
+          },
+          {
+            "max_value": 10,
+            "min_value": 0,
+            "type": 10,
+            "name": "min_rating",
+            "description": "Minimum TMDB rating",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "random",
+        "description": "Get a random movie recommendation",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "info",
+        "description": "Get detailed information about a movie",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie title",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "compare",
+        "description": "Compare two movies side by side",
+        "options": [
+          {
+            "type": 3,
+            "name": "movie1",
+            "description": "First movie",
+            "required": true
+          },
+          {
+            "type": 3,
+            "name": "movie2",
+            "description": "Second movie",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "top10",
+        "description": "See top 10 trending movies",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "watchlist",
+        "description": "Manage or view your saved watchlist",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "View",
+                "value": "view"
+              },
+              {
+                "name": "Add",
+                "value": "add"
+              },
+              {
+                "name": "Remove",
+                "value": "remove"
+              },
+              {
+                "name": "Clear",
+                "value": "clear"
+              }
+            ],
+            "name": "action",
+            "description": "What to do",
+            "required": false
+          },
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie title for add/remove",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "history",
+        "description": "View your watched movie history",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "foryou",
+        "description": "Get personalized movie recommendations",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "rate",
+        "description": "Rate a movie directly",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie title",
+            "required": true
+          },
+          {
+            "max_value": 5,
+            "min_value": 1,
+            "type": 4,
+            "name": "rating",
+            "description": "Your rating",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "unrate",
+        "description": "Remove your rating from a movie",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie title",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "profile",
+        "description": "View a compact movie profile",
+        "options": [
+          {
+            "name": "user",
+            "description": "User to inspect",
+            "required": false,
+            "type": 6
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "poll",
+        "description": "Start a movie night poll based on a movie seed",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie to build the poll from",
+            "required": true
+          },
+          {
+            "max_value": 5,
+            "min_value": 2,
+            "type": 4,
+            "name": "options",
+            "description": "How many poll options",
+            "required": false
+          },
+          {
+            "max_value": 120,
+            "min_value": 1,
+            "type": 4,
+            "name": "duration",
+            "description": "Poll duration in minutes",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "feedback",
+        "description": "Teach the bot your movie taste",
+        "options": [
+          {
+            "type": 3,
+            "name": "title",
+            "description": "Movie title",
+            "required": true
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Favorite",
+                "value": "favorite"
+              },
+              {
+                "name": "Not Interested",
+                "value": "not_interested"
+              },
+              {
+                "name": "Show Less Like This",
+                "value": "show_less"
+              }
+            ],
+            "name": "type",
+            "description": "Feedback type",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "overlap",
+        "description": "Compare movie taste overlap between two users",
+        "options": [
+          {
+            "name": "user1",
+            "description": "First user",
+            "required": true,
+            "type": 6
+          },
+          {
+            "name": "user2",
+            "description": "Second user",
+            "required": true,
+            "type": 6
+          }
+        ]
+      }
+    ],
+    "name": "movie",
+    "description": "Movie recommendations and info",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user1",
+        "description": "First",
+        "required": true,
+        "type": 6
+      },
+      {
+        "name": "user2",
+        "description": "Second",
+        "required": true,
+        "type": 6
+      }
+    ],
+    "name": "ship",
+    "description": "Ship two users",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Multiple Choice",
+            "value": "multiple"
+          },
+          {
+            "name": "Single Answer",
+            "value": "single"
+          }
+        ],
+        "name": "mode",
+        "description": "Trivia style",
+        "required": true
+      }
+    ],
+    "name": "trivia",
+    "description": "Start trivia",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "max_value": 5,
+        "min_value": 1,
+        "type": 4,
+        "name": "riddles",
+        "description": "Number (1-5)",
+        "required": false
+      },
+      {
+        "max_value": 60,
+        "min_value": 10,
+        "type": 4,
+        "name": "time",
+        "description": "Seconds per riddle (10-60)",
+        "required": false
+      },
+      {
+        "name": "autostart",
+        "description": "Auto-start after 60s (default: true)",
+        "required": false,
+        "type": 5
+      }
+    ],
+    "name": "riddle",
+    "description": "Start riddle game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "guess",
+        "description": "Guess a country from several clues",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "flag",
+        "description": "Guess a country from its flag",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "capital",
+        "description": "Match a capital to its country",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "clues",
+        "description": "Get progressive country hints over time",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "population",
+        "description": "Guess which country has the highest population",
+        "options": []
+      }
+    ],
+    "name": "countrygame",
+    "description": "Start a country guessing game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel",
+        "required": true,
+        "type": 7
+      },
+      {
+        "type": 4,
+        "name": "min",
+        "description": "Min number",
+        "required": true
+      },
+      {
+        "type": 4,
+        "name": "max",
+        "description": "Max number",
+        "required": true
+      },
+      {
+        "type": 4,
+        "name": "cooldown",
+        "description": "Cooldown seconds",
+        "required": true
+      }
+    ],
+    "name": "guesschannel",
+    "description": "Set up guess-the-number game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 4,
+        "name": "min",
+        "description": "Min number",
+        "required": false
+      },
+      {
+        "type": 4,
+        "name": "max",
+        "description": "Max number",
+        "required": false
+      },
+      {
+        "type": 4,
+        "name": "cooldown",
+        "description": "Cooldown seconds",
+        "required": false
+      }
+    ],
+    "name": "guessthenumber",
+    "description": "Start a single guess-the-number game in this channel",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "stopguess",
+    "description": "Stop the active guess-the-number game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for bot replies",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable talk channel",
+        "required": false
+      }
+    ],
+    "name": "talkchannel",
+    "description": "Set channel for bot replies",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for pet events",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable pet channel",
+        "required": false
+      }
+    ],
+    "name": "petchannel",
+    "description": "Set channel for pet events and egg spawns",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for logs",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable logs channel",
+        "required": false
+      }
+    ],
+    "name": "logschannel",
+    "description": "Set channel for bot progress logs",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for event announcements",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable event announcement channel",
+        "required": false
+      }
+    ],
+    "name": "eventchannel",
+    "description": "Set channel for public event announcements",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for Meow Bot updates",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable update posts",
+        "required": false
+      }
+    ],
+    "name": "announcechannel",
+    "description": "Set channel for Meow Bot update posts",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for daily word notifications",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable Daily Wordle posts",
+        "required": false
+      }
+    ],
+    "name": "dailywordlechannel",
+    "description": "Set channel for new Daily Wordle notifications",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "channel",
+        "description": "Channel for anonymous statements",
+        "required": false,
+        "type": 7
+      },
+      {
+        "type": 3,
+        "name": "disable",
+        "description": "Type \"off\" to disable anonymous statements channel",
+        "required": false
+      }
+    ],
+    "name": "anonymouschannel",
+    "description": "Set channel for anonymous statements",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "setup",
+        "description": "Set or disable the counting channel",
+        "options": [
+          {
+            "name": "channel",
+            "description": "Channel for counting",
+            "required": false,
+            "type": 7
+          },
+          {
+            "type": 3,
+            "name": "disable",
+            "description": "Type \"off\" to disable counting channel",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "move",
+        "description": "Move counting to a new channel without resetting the count",
+        "options": [
+          {
+            "name": "channel",
+            "description": "New counting channel",
+            "required": true,
+            "type": 7
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "emoji",
+        "description": "Set counting reaction emojis",
+        "options": [
+          {
+            "type": 3,
+            "name": "correct",
+            "description": "Emoji for correct numbers",
+            "required": false
+          },
+          {
+            "type": 3,
+            "name": "wrong",
+            "description": "Emoji for wrong numbers",
+            "required": false
+          },
+          {
+            "type": 3,
+            "name": "disable",
+            "description": "Type \"off\" to clear custom counting emojis",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "resume",
+        "description": "Use a Counting Resume item to continue from this server's highest count or any lower number",
+        "options": [
+          {
+            "min_value": 0,
+            "type": 4,
+            "name": "number",
+            "description": "Resume from this number or lower",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "goal",
+        "description": "Set or clear the counting goal reward number",
+        "options": [
+          {
+            "min_value": 1,
+            "type": 4,
+            "name": "number",
+            "description": "Goal number and reward amount",
+            "required": false
+          },
+          {
+            "type": 3,
+            "name": "disable",
+            "description": "Type \"off\" to clear the goal",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "stats",
+        "description": "View counting stats for this server",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "leaderboard",
+        "description": "View counting leaderboards",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "User",
+                "value": "user"
+              },
+              {
+                "name": "Server",
+                "value": "server"
+              }
+            ],
+            "name": "type",
+            "description": "Leaderboard type",
+            "required": true
+          },
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Server",
+                "value": "server"
+              },
+              {
+                "name": "Global",
+                "value": "global"
+              }
+            ],
+            "name": "scope",
+            "description": "User leaderboard scope",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "shop",
+        "description": "Open the graphical counting shop",
+        "options": []
+      }
+    ],
+    "name": "counting",
+    "description": "Manage the counting channel",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Truth",
+            "value": "truth"
+          },
+          {
+            "name": "Dare",
+            "value": "dare"
+          }
+        ],
+        "name": "type",
+        "description": "Choose truth or dare",
+        "required": false
+      },
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Cozy",
+            "value": "cozy"
+          },
+          {
+            "name": "Spicy",
+            "value": "spicy"
+          },
+          {
+            "name": "Feral",
+            "value": "feral"
+          }
+        ],
+        "name": "level",
+        "description": "Prompt intensity",
+        "required": false
+      },
+      {
+        "name": "target",
+        "description": "Include this player in the dare",
+        "required": false,
+        "type": 6
+      }
+    ],
+    "name": "truthordare",
+    "description": "Play Truth or Dare!",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Cozy",
+            "value": "cozy"
+          },
+          {
+            "name": "Spicy",
+            "value": "spicy"
+          },
+          {
+            "name": "Feral",
+            "value": "feral"
+          }
+        ],
+        "name": "level",
+        "description": "Prompt intensity",
+        "required": false
+      }
+    ],
+    "name": "nhie",
+    "description": "Get a Never Have I Ever prompt",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Cozy",
+            "value": "cozy"
+          },
+          {
+            "name": "Spicy",
+            "value": "spicy"
+          },
+          {
+            "name": "Feral",
+            "value": "feral"
+          }
+        ],
+        "name": "level",
+        "description": "Prompt intensity",
+        "required": false
+      }
+    ],
+    "name": "paranoia",
+    "description": "Get a paranoia question",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "target",
+        "description": "Who should receive it",
+        "required": true,
+        "type": 6
+      },
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Neutral",
+            "value": "neutral"
+          },
+          {
+            "name": "Dark",
+            "value": "dark"
+          },
+          {
+            "name": "Soft",
+            "value": "soft"
+          },
+          {
+            "name": "Love",
+            "value": "love"
+          },
+          {
+            "name": "Angry",
+            "value": "angry"
+          },
+          {
+            "name": "Hype",
+            "value": "hype"
+          }
+        ],
+        "name": "mood",
+        "description": "Choose the vibe",
+        "required": false
+      }
+    ],
+    "name": "anonymousstatement",
+    "description": "Send an anonymous sentence to a player",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "Who to hug",
+        "required": true,
+        "type": 6
+      }
+    ],
+    "name": "hug",
+    "description": "Hug someone",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "Who to kiss",
+        "required": true,
+        "type": 6
+      }
+    ],
+    "name": "kiss",
+    "description": "Kiss someone",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "name": "option_a",
+        "description": "Option A (optional)",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "option_b",
+        "description": "Option B (optional)",
+        "required": false
+      },
+      {
+        "max_value": 120,
+        "min_value": 10,
+        "type": 4,
+        "name": "duration",
+        "description": "Duration in seconds (10-120)",
+        "required": false
+      }
+    ],
+    "name": "wouldyourather",
+    "description": "Start Would You Rather",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "dadjoke",
+    "description": "Start interactive dad joke",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Easy",
+            "value": "easy"
+          },
+          {
+            "name": "Medium",
+            "value": "medium"
+          },
+          {
+            "name": "Hard",
+            "value": "hard"
+          }
+        ],
+        "name": "difficulty",
+        "description": "Difficulty level",
+        "required": false
+      },
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Solo",
+            "value": "solo"
+          },
+          {
+            "name": "Multiplayer",
+            "value": "multiplayer"
+          }
+        ],
+        "name": "mode",
+        "description": "Play solo or multiplayer",
+        "required": false
+      }
+    ],
+    "name": "hangman",
+    "description": "Start Hangman game",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "wordchain",
+    "description": "Start Word Chain game",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "guessthenearest",
+    "description": "Start a customizable multiplayer nearest-number game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "max_value": 10,
+        "min_value": 1,
+        "type": 4,
+        "name": "rounds",
+        "description": "Number of rounds (1-10)",
+        "required": false
+      },
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Easy",
+            "value": "easy"
+          },
+          {
+            "name": "Medium",
+            "value": "medium"
+          },
+          {
+            "name": "Hard",
+            "value": "hard"
+          }
+        ],
+        "name": "difficulty",
+        "description": "Difficulty level",
+        "required": false
+      },
+      {
+        "max_value": 60,
+        "min_value": 10,
+        "type": 4,
+        "name": "time",
+        "description": "Time per round (10-60 seconds)",
+        "required": false
+      }
+    ],
+    "name": "scramble",
+    "description": "Start a Scramble Words game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Solo",
+            "value": "solo"
+          },
+          {
+            "name": "With Friends",
+            "value": "friends"
+          }
+        ],
+        "name": "mode",
+        "description": "Play solo or with friends",
+        "required": false
+      },
+      {
+        "max_value": 10,
+        "min_value": 3,
+        "type": 4,
+        "name": "letters",
+        "description": "Word length (3-10 letters)",
+        "required": false
+      },
+      {
+        "type": 3,
+        "name": "theme",
+        "description": "Theme name, \"random\", or \"list\"",
+        "required": false
+      }
+    ],
+    "name": "wordle",
+    "description": "Start a Wordle game",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "dailywordle",
+    "description": "Play the Daily Wordle (continue it from any server)",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "wordlestats",
+    "description": "View your Wordle statistics",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "setup",
+        "description": "Set the WTP game channel",
+        "options": [
+          {
+            "name": "channel",
+            "description": "Channel for WTP",
+            "required": false,
+            "type": 7
+          },
+          {
+            "type": 3,
+            "name": "disable",
+            "description": "Type \"off\" to disable WTP channel",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "start",
+        "description": "Start the WTP game",
+        "options": []
+      },
+      {
+        "type": 1,
+        "name": "stop",
+        "description": "Stop the WTP game",
+        "options": []
+      }
+    ],
+    "name": "wtp",
+    "description": "Who's That Pokemon Game",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "stopgame",
+    "description": "Stop any active game in this channel",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "help",
+    "description": "Show all commands",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "View another user's achievements",
+        "required": false,
+        "type": 6
+      }
+    ],
+    "name": "achievements",
+    "description": "View your achievements",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "View another user's inventory",
+        "required": false,
+        "type": 6
+      }
+    ],
+    "name": "inventory",
+    "description": "View your owned shop items",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "User to trade with",
+        "required": true,
+        "type": 6
+      },
+      {
+        "type": 3,
+        "name": "offer",
+        "description": "Item you offer (badge or title name)",
+        "required": true
+      },
+      {
+        "type": 3,
+        "name": "request",
+        "description": "Item you want from them",
+        "required": true
+      }
+    ],
+    "name": "trade",
+    "description": "Trade badges/titles with another user",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "clearmemory",
+    "description": "Clear conversation memory with the bot",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "mydata",
+    "description": "Manage your stored data and participation preferences",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "user",
+        "description": "User to reset",
+        "required": true,
+        "type": 6
+      },
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "All",
+            "value": "all"
+          },
+          {
+            "name": "Coins",
+            "value": "coins"
+          },
+          {
+            "name": "XP/Level",
+            "value": "xp"
+          },
+          {
+            "name": "Achievements",
+            "value": "achievements"
+          },
+          {
+            "name": "Wordle Stats",
+            "value": "wordle"
+          },
+          {
+            "name": "Badges/Titles",
+            "value": "shop"
+          },
+          {
+            "name": "Daily Streak",
+            "value": "streak"
+          }
+        ],
+        "name": "field",
+        "description": "Field to reset (or \"all\")",
+        "required": true
+      }
+    ],
+    "name": "resetuser",
+    "description": "Reset a user's data (admin only)",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "max_value": 500,
+        "min_value": 1,
+        "type": 4,
+        "name": "count",
+        "description": "How many saved changelog entries to show (default all)",
+        "required": false
+      }
+    ],
+    "name": "changelog",
+    "description": "View saved Meow Bot changelog entries",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "max_value": 50,
+        "min_value": 1,
+        "type": 4,
+        "name": "count",
+        "description": "How many saved announcements to show (default all)",
+        "required": false
+      }
+    ],
+    "name": "announcements",
+    "description": "View saved Meow Bot announcement posts",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "featureandbug",
+    "description": "Send a game feature request, utility feature request, or bug report",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "max_value": 10,
+        "min_value": 1,
+        "type": 4,
+        "name": "count",
+        "description": "How many of your recent requests to show",
+        "required": false
+      }
+    ],
+    "name": "myrequests",
+    "description": "View your recent feature requests and bug reports",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "pet",
+    "description": "Open the pet management panel",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "image",
+        "description": "Image for your current pet",
+        "required": false,
+        "type": 11
+      },
+      {
+        "name": "clear",
+        "description": "Remove the current pet image",
+        "required": false,
+        "type": 5
+      }
+    ],
+    "name": "petimage",
+    "description": "Upload or clear your pet image",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "petfuneral",
+    "description": "Release your ghost pet and move on",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "start",
+    "description": "Show setup steps and important bot info",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "All Games",
+            "value": "all"
+          },
+          {
+            "name": "Trivia",
+            "value": "trivia"
+          },
+          {
+            "name": "Trivia (Single Answer)",
+            "value": "trivia_single"
+          },
+          {
+            "name": "Riddles",
+            "value": "riddle"
+          },
+          {
+            "name": "Country Games",
+            "value": "countrygame"
+          },
+          {
+            "name": "Hangman",
+            "value": "hangman"
+          },
+          {
+            "name": "Word Chain",
+            "value": "wordchain"
+          },
+          {
+            "name": "Guess The Nearest",
+            "value": "guessthenearest"
+          },
+          {
+            "name": "Scramble",
+            "value": "scramble"
+          },
+          {
+            "name": "Wordle",
+            "value": "wordle"
+          },
+          {
+            "name": "Daily Wordle",
+            "value": "dailywordle"
+          },
+          {
+            "name": "Dad Joke",
+            "value": "dadjoke"
+          },
+          {
+            "name": "Would You Rather",
+            "value": "wouldyourather"
+          },
+          {
+            "name": "Truth or Dare",
+            "value": "truthordare"
+          },
+          {
+            "name": "Never Have I Ever",
+            "value": "nhie"
+          },
+          {
+            "name": "Paranoia",
+            "value": "paranoia"
+          },
+          {
+            "name": "WTP",
+            "value": "wtp"
+          },
+          {
+            "name": "Guess the Number",
+            "value": "guess"
+          },
+          {
+            "name": "Blackjack",
+            "value": "blackjack"
+          },
+          {
+            "name": "PvP",
+            "value": "pvp"
+          },
+          {
+            "name": "Pets",
+            "value": "pets"
+          },
+          {
+            "name": "Server Lottery",
+            "value": "lottery"
+          }
+        ],
+        "name": "game",
+        "description": "Game name",
+        "required": true
+      }
+    ],
+    "name": "howtoplay",
+    "description": "Learn how to play any game",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "max_value": 10000,
+        "min_value": 10,
+        "type": 4,
+        "name": "bet",
+        "description": "Coins to bet",
+        "required": true
+      }
+    ],
+    "name": "blackjack",
+    "description": "Play Blackjack",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "start",
+        "description": "Start a lottery",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Weekly Lottery",
+                "value": "weekly"
+              },
+              {
+                "name": "Event Lottery",
+                "value": "event"
+              }
+            ],
+            "name": "mode",
+            "description": "Lottery mode",
+            "required": true
+          },
+          {
+            "type": 4,
+            "name": "seed",
+            "description": "Host seed pot for event lottery",
+            "required": false
+          },
+          {
+            "type": 4,
+            "name": "ticket_price",
+            "description": "Ticket price for event lottery",
+            "required": false
+          },
+          {
+            "type": 4,
+            "name": "duration_minutes",
+            "description": "Event lottery duration in minutes",
+            "required": false
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "view",
+        "description": "View an active lottery",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Weekly Lottery",
+                "value": "weekly"
+              },
+              {
+                "name": "Event Lottery",
+                "value": "event"
+              }
+            ],
+            "name": "mode",
+            "description": "Lottery mode",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "history",
+        "description": "View recent lottery winners",
+        "options": []
+      }
+    ],
+    "name": "lottery",
+    "description": "Weekly and event lotteries",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "meme",
+    "description": "Get a random meme",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 3,
+        "choices": [
+          {
+            "name": "Random",
+            "value": "random"
+          },
+          {
+            "name": "Ancient Egypt",
+            "value": "egypt"
+          },
+          {
+            "name": "Medieval Europe",
+            "value": "medieval"
+          },
+          {
+            "name": "Wild West",
+            "value": "wildwest"
+          },
+          {
+            "name": "Future 3000",
+            "value": "future"
+          },
+          {
+            "name": "Jurassic Period",
+            "value": "jurassic"
+          }
+        ],
+        "name": "era",
+        "description": "Choose your destination",
+        "required": false
+      }
+    ],
+    "name": "timetravel",
+    "description": "Travel through time and change history!",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "name": "opponent",
+        "description": "Who to fight",
+        "required": true,
+        "type": 6
+      }
+    ],
+    "name": "petfight",
+    "description": "Challenge another player to a pet fight!",
+    "type": 1
+  },
+  {
+    "options": [
+      {
+        "type": 1,
+        "name": "create",
+        "description": "Create a new tournament",
+        "options": [
+          {
+            "type": 3,
+            "choices": [
+              {
+                "name": "Pet Fight",
+                "value": "petfight"
+              }
+            ],
+            "name": "game",
+            "description": "Game type",
+            "required": true
+          },
+          {
+            "max_value": 10000,
+            "min_value": 10,
+            "type": 4,
+            "name": "entry_fee",
+            "description": "Entry fee in coins",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "join",
+        "description": "Join an open tournament",
+        "options": [
+          {
+            "type": 3,
+            "name": "id",
+            "description": "Tournament ID",
+            "required": true
+          }
+        ]
+      },
+      {
+        "type": 1,
+        "name": "status",
+        "description": "View active tournaments",
+        "options": []
+      }
+    ],
+    "name": "tournament",
+    "description": "Create or join a tournament",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "event",
+    "description": "Open the graphical XP and coin event panel",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "reactions",
+    "description": "Open the automatic reaction settings panel",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "textcommands",
+    "description": "Show retired text command replacements",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "serverinfo",
+    "description": "Show the current Meow Bot setup for this server",
+    "type": 1
+  },
+  {
+    "options": [],
+    "name": "quests",
+    "description": "View your daily quests",
+    "type": 1
+  }
+]
